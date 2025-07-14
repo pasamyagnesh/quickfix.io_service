@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFix - Your Problem Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4F46E5',
+                        'secondary': '#7C3AED',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .service-card-glass {
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .service-card-glass:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4F46E5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Loader Styles - Apple-like with violet background */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loader-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+        }
+        
+        .loader-services {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .loader-service-item {
+            width: 72px;
+            height: 72px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            transform: scale(0);
+            animation: popIn 0.8s ease-out forwards;
+            transition: all 0.3s ease;
+        }
+        
+        .loader-service-item:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .loader-service-item i {
+            font-size: 28px;
+            color: white;
+            opacity: 0.9;
+        }
+        
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+                rotate: 180deg;
+            }
+            60% {
+                transform: scale(1.1);
+                rotate: -10deg;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+                rotate: 0deg;
+            }
+        }
+        
+        .loader-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .loader-brand .logo {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: logoFloat 2s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loader-brand .brand-text {
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            animation: textFadeIn 1s ease-out;
+            letter-spacing: -0.5px;
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        
+        @keyframes textFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loader-progress {
+            width: 240px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .loader-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #f0f0f0);
+            border-radius: 3px;
+            transform: translateX(-100%);
+            animation: progressBar 2s ease-out forwards;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        @keyframes progressBar {
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        .loader-text {
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.8;
+            animation: textPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes textPulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .loader-services {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .loader-service-item {
+                width: 64px;
+                height: 64px;
+            }
+            
+            .loader-service-item i {
+                font-size: 24px;
+            }
+            
+            .loader-brand .brand-text {
+                font-size: 28px;
+            }
+            
+            .loader-progress {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <!-- Loader Overlay -->
+    <div id="loaderOverlay" class="loader-overlay">
+        <div class="loader-container">
+            <!-- Brand Logo -->
+            <div class="loader-brand">
+                <div class="logo">
+                    <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                </div>
+                <span class="brand-text">QuickFix</span>
+            </div>
+            
+            <!-- Services Icons -->
+            <div class="loader-services">
+                <div class="loader-service-item" style="animation-delay: 0.1s;">
+                    <i class="fa-solid fa-plug"></i>
+                </div>
+                <div class="loader-service-item" style="animation-delay: 0.2s;">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <div class="loader-service-item" style="animation-delay: 0.3s;">
+                    <i class="fa-solid fa-broom"></i>
+                </div>
+                <div class="loader-service-item" style="animation-delay: 0.4s;">
+                    <i class="fa-solid fa-hammer"></i>
+                </div>
+                <div class="loader-service-item" style="animation-delay: 0.5s;">
+                    <i class="fa-solid fa-fan"></i>
+                </div>
+                <div class="loader-service-item" style="animation-delay: 0.6s;">
+                    <i class="fa-solid fa-paintbrush"></i>
+                </div>
+                <div class="loader-service-item" style="animation-delay: 0.7s;">
+                    <i class="fa-solid fa-wrench"></i>
+                </div>
+                <div class="loader-service-item" style="animation-delay: 0.8s;">
+                    <i class="fa-solid fa-water"></i>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="loader-progress">
+                <div class="loader-progress-bar"></div>
+            </div>
+            
+            <!-- Loading Text -->
+            <div class="loader-text">Setting up your services...</div>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div id="mainContent" style="opacity: 0;">
+        <!-- Navigation -->
+        <nav class="glass-effect py-4 px-6">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                        </svg>
+                    </div>
+                    <span class="text-white text-xl font-bold">QuickFix</span>
+                </div>
+                <div class="text-white text-sm">
+                    Your Problem Solver
+                </div>
+            </div>
+        </nav>
+
+    <!-- Hero Section -->
+    <div class="container mx-auto px-6 py-12">
+        <div class="text-center mb-12 fade-in">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
+                Find trusted local workers in minutes
+            </h1>
+            <p class="text-xl text-white/90 mb-8">
+                for your home services
+            </p>
+        </div>
+
+        <!-- Services Grid - Responsive: 2 columns mobile, 4 columns desktop -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-5xl mx-auto">
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-plug text-yellow-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">Electrician</p>
+            </div>
+
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-screwdriver-wrench text-blue-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">Plumber</p>
+            </div>
+
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-broom text-green-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">Cleaner</p>
+            </div>
+
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-hammer text-amber-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">Carpenter</p>
+            </div>
+
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-fan text-cyan-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">AC Repair</p>
+            </div>
+
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-paintbrush text-purple-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">Painter</p>
+            </div>
+
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-wrench text-gray-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">Mechanic</p>
+            </div>
+
+            <div class="service-card-glass p-4 rounded-xl text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-water text-purple-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-white">Septic Tank</p>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="max-w-2xl mx-auto">
+            <div class="form-container rounded-3xl p-8 shadow-2xl">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Your Problem Solver</h2>
+                    <p class="text-gray-600">Fill out the form below and we'll connect you with the right professional</p>
+                </div>
+
+                <form id="serviceForm" class="space-y-6">
+                    <!-- Name Field -->
+                    <div class="relative">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="name" name="name" required
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors bg-white/80"
+                               placeholder="Enter your full name">
+                    </div>
+
+                    <!-- Phone Number Field -->
+                    <div class="relative">
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors bg-white/80"
+                               placeholder="Enter your phone number">
+                    </div>
+
+                    <!-- Address Field -->
+                    <div class="relative">
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                        <textarea id="address" name="address" required rows="3"
+                                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors bg-white/80 resize-none"
+                                  placeholder="Enter your complete address"></textarea>
+                    </div>
+
+                    <!-- Service Type Dropdown -->
+                    <div class="relative">
+                        <label for="serviceType" class="block text-sm font-medium text-gray-700 mb-2">Service Type</label>
+                        <select id="serviceType" name="serviceType" required
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-colors bg-white/80">
+                            <option value="">Select a service type</option>
+                            <option value="electrician">Electrician Services</option>
+                            <option value="plumber">Plumber Services</option>
+                            <option value="cleaner">Cleaner Services</option>
+                            <option value="carpenter">Carpenter Services</option>
+                            <option value="ac-repair">AC Repair Services</option>
+                            <option value="painter">Painter Services</option>
+                            <option value="mechanic">Mechanic Services</option>
+                            <option value="septic-tank">Septic Tank Cleaning</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn"
+                            class="w-full bg-gradient-to-r from-primary to-secondary text-white py-4 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 pulse-animation">
+                        Request Service
+                    </button>
+                </form>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden text-center py-12">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600 text-lg">Processing your request...</p>
+                    <p class="text-gray-500 text-sm mt-2">Please wait while we connect you with a professional</p>
+                </div>
+
+                <!-- Success State -->
+                <div id="successState" class="hidden text-center py-12">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Request Submitted Successfully!</h3>
+                    <p class="text-gray-600 mb-4">We'll contact you within 5 secs to discuss your service needs.</p>
+                    <button onclick="resetForm()" class="text-primary hover:text-secondary font-medium">
+                        Submit Another Request
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Support -->
+        <div class="text-center mt-12">
+            <div class="glass-effect rounded-2xl p-6 max-w-md mx-auto">
+                <h3 class="text-white text-lg font-semibold mb-2">Need Help?</h3>
+                <p class="text-white/90 text-sm mb-4">Our customer support team is here to assist you</p>
+                <div class="text-white font-medium space-y-1">
+                    📞 Customer Support 1: <a href="tel:9392708186" class="underline hover:text-blue-300">9392708186</a><br>
+                    📞 Customer Support 2: <a href="tel:9100411357" class="underline hover:text-blue-300">9100411357</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script src="QuickFix.js"></script>
+</body>
+</html>

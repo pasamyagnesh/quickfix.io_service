@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFix - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#2563EB',
+                        'secondary': '#1E40AF',
+                        'accent': '#3B82F6',
+                        'light-blue': '#DBEAFE',
+                        'dark-blue': '#1E3A8A',
+                        'admin-bg': '#F8FAFC',
+                        'card-bg': '#FFFFFF',
+                        'text-primary': '#1E293B',
+                        'text-secondary': '#64748B',
+                        'success': '#10B981',
+                        'warning': '#F59E0B',
+                        'danger': '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+            border: 1px solid #93C5FD;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .status-completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-in-progress {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, #1E40AF 0%, #2563EB 100%);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #FFFFFF;
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+            border-bottom: 2px solid #CBD5E1;
+        }
+        
+        .table-row:nth-child(even) {
+            background: #F8FAFC;
+        }
+        
+        .table-row:hover {
+            background: #EFF6FF;
+            transition: all 0.2s ease;
+        }
+        
+        .modal {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .action-btn {
+            transition: all 0.2s ease;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .search-box {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus {
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .service-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+            border: 1px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-admin-bg min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 min-h-screen p-6 fixed left-0 top-0 z-10">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                    <svg class="w-7 h-7 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-white text-xl font-bold">QuickFix</h1>
+                    <p class="text-blue-200 text-sm">Admin Panel</p>
+                </div>
+            </div>
+            
+            <nav class="space-y-2">
+                <div class="sidebar-item active p-3 text-white cursor-pointer" onclick="showSection('dashboard')">
+                    <i class="fas fa-home mr-3"></i>
+                    Dashboard
+                </div>
+                <div class="sidebar-item p-3 text-white cursor-pointer" onclick="showSection('requests')">
+                    <i class="fas fa-clipboard-list mr-3"></i>
+                    All Requests
+                </div>
+                <div class="sidebar-item p-3 text-white cursor-pointer" onclick="showSection('workers')">
+                <i class="fas fa-user-cog mr-3"></i>
+                    Available Workers
+                </div>
+
+                <div class="sidebar-item p-3 text-white cursor-pointer" onclick="showSection('analytics')">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    Analytics
+                </div>
+                <div class="sidebar-item p-3 text-white cursor-pointer" onclick="showSection('services')">
+                    <i class="fas fa-tools mr-3"></i>
+                    Manage Services
+                </div>
+                <div class="sidebar-item p-3 text-white cursor-pointer" onclick="showSection('settings')">
+                    <i class="fas fa-cog mr-3"></i>
+                    Settings
+                </div>
+            </nav>
+            
+            <div class="mt-auto pt-6">
+                <div class="p-3 bg-white/10 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-medium">Admin User</p>
+                            <p class="text-blue-200 text-sm">admin@QuickFix.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 ml-64 p-6">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-text-primary">Dashboard</h2>
+                    <p class="text-text-secondary">Welcome back! Here's what's happening with your services today.</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search requests..." 
+                               class="search-box pl-10 pr-4 py-2 rounded-lg outline-none">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+                        <i class="fas fa-plus mr-2"></i>New Request
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card p-6 rounded-xl card-hover fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-text-secondary text-sm font-medium">Total Requests</p>
+                                <h3 id="totalRequests" class="text-2xl font-bold text-text-primary mt-1">0</h3>
+                                <p id="growthRate" class="text-success text-sm mt-1">
+                                <i class="fas fa-arrow-up mr-1"></i>0% from last month
+                                </p>
+
+                            </div>
+                            <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clipboard-list text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card p-6 rounded-xl card-hover fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-text-secondary text-sm font-medium">Pending</p>
+                                <h3 id="pendingRequests" class="text-2xl font-bold text-text-primary mt-1">0</h3>
+                                <p class="text-warning text-sm mt-1">
+                                    <i class="fas fa-clock mr-1"></i>Needs attention
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-warning rounded-lg flex items-center justify-center">
+                                <i class="fas fa-hourglass-half text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card p-6 rounded-xl card-hover fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-text-secondary text-sm font-medium">Completed</p>
+                                <h3 id="completedRequests" class="text-2xl font-bold text-text-primary mt-1">0</h3>
+                                <p id="successRate" class="text-success text-sm mt-1">
+                                <i class="fas fa-check mr-1"></i>0% success rate
+                                </p>
+
+                            </div>
+                            <div class="w-12 h-12 bg-success rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card p-6 rounded-xl card-hover fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-text-secondary text-sm font-medium">Total Workers</p>
+                                <h3 id="totalWorkers" class="text-2xl font-bold text-text-primary mt-1">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-accent rounded-lg flex items-center justify-center">
+                                <i class="fas fa-hard-hat text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Requests -->
+                <div class="glass-effect rounded-xl p-6 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-text-primary">Recent Requests</h3>
+                        <button class="text-primary hover:text-secondary font-medium">View All</button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="table-header">
+                                <tr>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Customer</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Service</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Phone</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Status</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Date</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentRequestsTable">
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- All Requests Section -->
+            <div id="requests" class="section hidden">
+                <div class="glass-effect rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-text-primary">All Service Requests</h3>
+                        <div class="flex space-x-3">
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                <option value="">All Services</option>
+                                <option value="electrician">Electrician</option>
+                                <option value="plumber">Plumber</option>
+                                <option value="cleaner">Cleaner</option>
+                                <option value="carpenter">Carpenter</option>
+                            </select>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="table-header">
+                                <tr>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">ID</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Customer</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Service</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Phone</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Address</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Status</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Date</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-text-primary">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allRequestsTable">
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Available Workers Section -->
+<div id="workers" class="section hidden">
+  <div class="glass-effect rounded-xl p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-bold text-text-primary">Available Workers</h3>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="table-header">
+          <tr>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">ID</th>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">Name</th>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">Profession</th>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">Phone</th>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">Location</th>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">Rating</th>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">Status</th>
+            <th class="text-left py-3 px-4 font-semibold text-text-primary">Action</th>
+          </tr>
+        </thead>
+        <tbody id="workersTable">
+          <!-- Dynamic rows here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="section hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-effect rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-text-primary mb-4">Service Type Distribution</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-4 h-4 bg-primary rounded"></div>
+                                    <span class="text-text-secondary">Electrician</span>
+                                </div>
+                                <span class="font-semibold text-text-primary">35%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-4 h-4 bg-accent rounded"></div>
+                                    <span class="text-text-secondary">Plumber</span>
+                                </div>
+                                <span class="font-semibold text-text-primary">28%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-4 h-4 bg-success rounded"></div>
+                                    <span class="text-text-secondary">Cleaner</span>
+                                </div>
+                                <span class="font-semibold text-text-primary">20%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-4 h-4 bg-warning rounded"></div>
+                                    <span class="text-text-secondary">Others</span>
+                                </div>
+                                <span class="font-semibold text-text-primary">17%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-effect rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-text-primary mb-4">Monthly Performance</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-text-secondary">Total Requests This Month</span>
+                                <span class="font-bold text-text-primary">47</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-text-secondary">Completed This Month</span>
+                                <span class="font-bold text-success">42</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-text-secondary">Average Response Time</span>
+                                <span class="font-bold text-text-primary">2.3 hrs</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-text-secondary">Customer Satisfaction</span>
+                                <span class="font-bold text-success">4.8/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Services Section -->
+            <div id="services" class="section hidden">
+                <div class="glass-effect rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-text-primary">Manage Services</h3>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Add Service
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="servicesGrid">
+                        <!-- Service cards will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Section -->
+            <div id="settings" class="section hidden">
+                <div class="glass-effect rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-text-primary mb-6">Settings</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="border-b pb-4">
+                            <h4 class="text-lg font-semibold text-text-primary mb-3">Contact Information</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-text-secondary mb-2">Support Phone 1</label>
+                                    <input type="tel" value="9392708186" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-secondary mb-2">Support Phone 2</label>
+                                    <input type="tel" value="9100411357" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-b pb-4">
+                            <h4 class="text-lg font-semibold text-text-primary mb-3">Notification Settings</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-text-secondary">Email notifications for new requests</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" value="" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-text-secondary">SMS notifications</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" value="" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors">
+                                Save Changes
+                            </button>
+                            <button class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Request Details Modal -->
+    <div id="requestModal" class="modal fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content bg-white rounded-xl shadow-2xl max-w-md w-full">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-text-primary">Request Details</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="modalContent" class="space-y-4">
+                        <!-- Modal content will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="updateRequestStatus('in-progress')" class="action-btn bg-primary text-white hover:bg-secondary">
+                            Mark In Progress
+                        </button>
+                        <button onclick="updateRequestStatus('completed')" class="action-btn bg-success text-white hover:bg-green-600">
+                            Mark Completed
+                        </button>
+                        <button onclick="closeModal()" class="action-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+   
+    <div id="workerModal" class="modal fixed inset-0 z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="modal-content bg-white rounded-xl shadow-2xl max-w-md w-full">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-text-primary">Worker Details</h3>
+          <button onclick="closeWorkerModal()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div id="workerModalContent" class="space-y-4">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="flex space-x-3 mt-6">
+          <button onclick="saveWorkerStatus()" class="action-btn bg-primary text-white hover:bg-secondary">
+            Save Changes
+          </button>
+          <button onclick="closeWorkerModal()" class="action-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="Admin.js"></script>
+</body>
+</html>
